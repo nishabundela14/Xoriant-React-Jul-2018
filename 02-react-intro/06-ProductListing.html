@@ -7,19 +7,39 @@
 	<script src="react-dom.js"></script>
 	<script src="babel.min.js"></script>
 	<script type="text/babel">
+		class EventEmitter{
+			_listeners = [];
+
+			subscribe(listenerFn){
+				this._listeners.push(listenerFn);
+			}
+			triggerChange(){
+				this._listeners.forEach(listenerFn => listenerFn());
+			}
+		}
+
+		class ProductsCollection extends EventEmitter{
+			list = [];
+			addNew(productName){
+				this.list.push(productName);
+				this.triggerChange();
+			}
+			getAll(){
+				return [...this.list];
+			}
+		}
+
 		class ProductList extends React.Component{
-			state = {list : [], newProductName : ''}
+			state = { newProductName : ''}
 			constructor(props){
 				super(props);
 				this.onAddNewClick = this.onAddNewClick.bind(this);
 			}
 			onAddNewClick(){
-				let products = this.state.list;
-				products.push(this.state.newProductName);
-				this.setState({list : products});
+				this.props.model.addNew(this.state.newProductName);
 			}
 			render(){
-				let { list : products } = this.state;
+				let products = this.props.model.getAll();
 				let productItems = products.map((product, index) => (<li key={index}>{product}</li>));
 				return(
 					<div>
@@ -38,17 +58,24 @@
 				return(
 					<div>
 						<label>Count : </label>
-						<span>0</span>
+						<span>{this.props.data}</span>
 					</div>
 				);
 			}
 		}
-		ReactDOM.render(
-			<div>
-				<ProductCount />
-				<ProductList />
-			</div>,
-			document.getElementById('root'));
+		let productsCollection = new ProductsCollection();
+		function renderApp(){
+			let count = productsCollection.getAll().length;
+			ReactDOM.render(
+
+				<div>
+					<ProductCount data={count} />
+					<ProductList model={productsCollection}/>
+				</div>,
+				document.getElementById('root'));
+		}
+		productsCollection.subscribe(renderApp);
+		renderApp();
 	</script>
 </head>
 <body>
