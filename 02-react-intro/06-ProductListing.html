@@ -8,21 +8,24 @@
 	<script src="babel.min.js"></script>
 	<script type="text/babel">
 		class ProductList extends React.Component{
+			state = {list : [], newProductName : ''}
+			constructor(props){
+				super(props);
+				this.onAddNewClick = this.onAddNewClick.bind(this);
+			}
+			onAddNewClick(){
+				let products = this.state.list;
+				products.push(this.state.newProductName);
+				this.setState({list : products});
+			}
 			render(){
-				let products = ['Pen', 'Pencil', 'Marker'];
-				/*let productItems = [];
-				for(let index = 0, count = products.length; index < count; index++){
-					let productItem = (<li key={index}>{products[index]}</li>);
-					productItems.push(productItem);
-				}*/
-
+				let { list : products } = this.state;
 				let productItems = products.map((product, index) => (<li key={index}>{product}</li>));
-			
 				return(
 					<div>
 						<label>Product Name </label>
-						<input type="text" />
-						<input value="Add New" type="button" />
+						<input type="text" onChange={evt => this.setState({newProductName : evt.target.value})} />
+						<input value="Add New" type="button" onClick={this.onAddNewClick} />
 						<ol>
 							{productItems}
 						</ol>
@@ -30,8 +33,21 @@
 				)
 			}
 		}
-
-		ReactDOM.render(<ProductList />,
+		class ProductCount extends React.Component{
+			render(){
+				return(
+					<div>
+						<label>Count : </label>
+						<span>0</span>
+					</div>
+				);
+			}
+		}
+		ReactDOM.render(
+			<div>
+				<ProductCount />
+				<ProductList />
+			</div>,
 			document.getElementById('root'));
 	</script>
 </head>
