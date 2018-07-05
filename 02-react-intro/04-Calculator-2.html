@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Greeter</title>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="babel.min.js"></script>
+	<script type="text/babel">
+		class EventEmitter{
+			_listeners = [];
+
+			subscribe(listenerFn){
+				this._listeners.push(listenerFn);
+			}
+
+			triggerChange(){
+				this._listeners.forEach(listenerFn => listenerFn());
+			}
+		}
+
+		class CalculatorModel extends EventEmitter{
+			n1 = 0;
+			n2 = 0;
+			result = 0;
+			add(){
+				this.result = this.n1 + this.n2;
+				this.triggerChange();
+			}
+			subtract(){
+				this.result = this.n1 - this.n2;
+				this.triggerChange();
+			}
+		}
+
+
+		class Calculator extends React.Component{
+			state = { result : 0, n1 : 0, n2 : 0 };
+			onAddClick(){
+				this.props.model.add();
+			}
+			onSubtractClick(){
+				this.props.model.subtract();
+			}
+			render(){
+				return(
+					<div>
+						<h1>Calculator</h1>
+						<hr/>
+						<input type="number" onChange={(evt) => this.props.model.n1 = evt.target.valueAsNumber}/>
+						<input type="number" onChange={(evt) => this.props.model.n2 = evt.target.valueAsNumber}/>
+						<br/>
+						<input type="button" value="Add" onClick={() => this.onAddClick()} />
+						<input type="button" value="Subtract" onClick={ () => this.onSubtractClick()} />
+						<div>{this.props.model.result}</div>
+					</div>
+				)
+			}
+		}
+
+		var model = new CalculatorModel();
+		function renderApp(){
+			ReactDOM.render(<Calculator model={model}/>,
+				document.getElementById('root'));
+		}
+		renderApp();
+		model.subscribe(renderApp);
+		
+	</script>
+</head>
+<body>
+	<div id="root"></div>
+</body>
+</html>
