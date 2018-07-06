@@ -56,7 +56,7 @@
 	<script type="text/babel">
 		
 
-		
+		{/* Reducers */}
 		function bugsReducer(currentState = [], action){
 			if (action.type === 'ADD_NEW'){
 				let newBug = action.payload;
@@ -76,6 +76,13 @@
 			return currentState;
 		}
 
+		function spinnerReducer(currentState = 0, action){
+			if (action.type === 'INCREMENT') return ++currentState;
+			if (action.type === 'DECREMENT') return --currentState;
+			return currentState;
+		}
+
+		{/* action creators */}
 		let bugActionCreators = {
 			addNew(bugName){
 				let newBug = {
@@ -97,8 +104,20 @@
 				return action;
 			}
 		}
-		
 
+		let spinnerActionCreators = {
+			increment(){
+				let action = { type : 'INCREMENT'};
+				return action;
+			},
+			decrement(){
+				let action = { type : 'DECREMENT'};
+				return action;
+			}
+		}
+
+		{/* UI Components */}
+		
 		class BugItem extends React.Component{
 			constructor(props){
 				super(props);
@@ -203,12 +222,40 @@
 			}
 		}
 
-		let store = Redux.createStore(bugsReducer);
+		let Spinner = ({ value, increment, decrement }) => (
+			<div>
+				<input type="button" value="DECREMENT" onClick={decrement}/>
+				<span> [ {value} ] </span>
+				<input type="button" value="INCREMENT" onClick={increment}/>
+			</div>
+		);
+
+		{/* root reducer*/}
+
+		let rootReducer = Redux.combineReducers({
+			spinnerData : spinnerReducer,
+			bugsData : bugsReducer
+		});
+
+		{/* Store */}
+		let store = Redux.createStore(rootReducer);
+
+		{/* actions */}
 		let bugActions = Redux.bindActionCreators(bugActionCreators, store.dispatch);
+		let spinnerActions = Redux.bindActionCreators(spinnerActionCreators, store.dispatch);
 
 		function renderApp(){
-			let bugs = store.getState();
-			ReactDOM.render(<BugTracker bugs={bugs} {...bugActions} />,
+			/* extract data for components */
+			let storeState = store.getState();
+			let bugs = storeState.bugsData,
+				spinnerValue = storeState.spinnerData;
+
+			ReactDOM.render(
+				<div>
+					<Spinner value={spinnerValue}  {...spinnerActions} />
+					<hr/>
+					<BugTracker bugs={bugs} {...bugActions} />
+				</div>,
 				document.getElementById('root'));
 		}
 		renderApp();
