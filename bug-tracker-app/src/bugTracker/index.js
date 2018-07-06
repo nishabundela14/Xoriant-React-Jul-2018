@@ -10,6 +10,9 @@ import BugList from './views/BugList';
 import BugEdit from './views/BugEdit';
 
 class BugTracker extends Component{
+	componentDidMount(){
+		this.props.load();
+	}
 	render(){
 		let { bugs, toggle, addNew, removeClosed } = this.props;
 		return(
@@ -25,6 +28,7 @@ class BugTracker extends Component{
 
 //State extraction 
 function mapStateToBugTrackerProps(storeState){
+	//let bugs = storeState.bugsData.filter((bug, index) => index % 2 === storeState.spinnerData % 2);
 	let bugs = storeState.bugsData;
 	return { bugs : bugs };
 }
@@ -32,6 +36,7 @@ function mapStateToBugTrackerProps(storeState){
 //action creation
 function mapDispatchToBugTrackerProps(dispatch){
 	let bugActions = bindActionCreators(bugActionCreators, dispatch);
+	window['bugActions'] = bugActions;
 	return bugActions;	
 }
 

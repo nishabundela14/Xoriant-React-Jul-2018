@@ -1,4 +1,7 @@
 function bugsReducer(currentState = [], action){
+	if (action.type === 'LOAD'){
+		return action.payload;
+	}
 	if (action.type === 'ADD_NEW'){
 		let newBug = action.payload;
 		let newState = [...currentState, newBug];
@@ -6,7 +9,7 @@ function bugsReducer(currentState = [], action){
 	}
 	if (action.type === 'UPDATE'){
 		let {oldBug, newBug} = action.payload;
-		let newState = currentState.map(bug => bug === oldBug ? newBug : bug);
+		let newState = currentState.map(bug => bug.id === oldBug.id ? newBug : bug);
 		return newState;
 	}
 	if (action.type === 'REMOVE'){
