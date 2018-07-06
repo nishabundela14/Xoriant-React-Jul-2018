@@ -64,24 +64,31 @@
 				this._listeners.forEach(listenerFn => listenerFn());
 			}
 		}
+
+		class Bug {
+			name  = '';
+			isClosed = false;
+			createdAt = null;
+
+			constructor(bugName){
+				this.name = bugName;
+				this.createdAt = new Date();
+			}
+
+			toggle(){
+				this.isClosed = !this.isClosed;
+			}
+
+		}
 		class BugsCollection extends EventEmitter{
 			list = [];
 
 			addNew(bugName){
-				let newBug = {
-					name : bugName,
-					isClosed : false,
-					createdAt : new Date()
-				};
+				let newBug = new Bug(bugName);
 				this.list.push(newBug);
 				this.triggerChange();
 			}
 
-			toggle(index){
-				let bug = this.list[index];
-				bug.isClosed = !bug.isClosed;
-				this.triggerChange();
-			}
 
 			getAll(){
 				return [...this.list];
@@ -93,6 +100,28 @@
 			}
 		}
 
+		class BugItem extends React.Component{
+			constructor(props){
+				super(props);
+				this.onBugNameClick = this.onBugNameClick.bind(this);
+			}
+			onBugNameClick(){
+				this.props.bug.toggle();
+				console.log(this.props.bug);
+			}
+			render(){
+				let { bug } = this.props;
+				let bugStyle = bug.isClosed ? 'bugname closed' : 'bugname';
+				return(
+					<li>
+						<span className={bugStyle} onClick={() => this.onBugNameClick()}>
+							{bug.name}
+						</span>
+						<div className="datetime">[Created At]</div>
+					</li>
+				)
+			}
+		}
 
 		class BugTracker extends React.Component{
 			state = { newBugName : ''};
@@ -100,7 +129,7 @@
 			constructor(props){
 				super(props);
 				this.onAddNewClick = this.onAddNewClick.bind(this);
-				this.onBugNameClick = this.onBugNameClick.bind(this);
+				
 				this.onRemoveClosedClick = this.onRemoveClosedClick.bind(this);
 			}
 
@@ -108,9 +137,7 @@
 				this.props.model.addNew(this.state.newBugName);
 			}
 
-			onBugNameClick(index){
-				this.props.model.toggle(index);
-			}
+			
 			onRemoveClosedClick(){
 				this.props.model.removeClosed();
 			}
@@ -118,17 +145,7 @@
 				let { model } = this.props,
 					bugs = model.getAll();
 
-				let bugItems = bugs.map((bug, index) => {
-					let bugStyle = bug.isClosed ? 'bugname closed' : 'bugname';
-					return (
-						<li key={index}>
-							<span className={bugStyle} onClick={() => this.onBugNameClick(index)}>
-								{bug.name}
-							</span>
-							<div className="datetime">[Created At]</div>
-						</li>
-					)
-				});
+				let bugItems = bugs.map((bug, index) => (<BugItem key={index} bug={bug} />));
 
 				let closedCount = bugs.reduce((prevResult, bug) => bug.isClosed ? ++prevResult : prevResult, 0);
 
